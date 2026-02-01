@@ -1,0 +1,46 @@
+Version 1.0 CPUL lisence (ChaOS Public Use license)
+
+Copyright © 2026 ChaOS Developers
+
+Permission is granted to any person(s) obtanining a copy of ChaOS ("The Software") to run, use, study,
+modify, and distribute it, subject to the following conditions:
+
+1. Attribution requirement
+
+    Any public showing for personal gain in forms of compensation of the ChaOS software must be acompanied 
+    by an Attribution to the developers (ChaOS Team) and any formally acknowledged partners.
+    Requirements in ways of attribution must include:
+
+    Clearly stated development of ChaOS was made by the ChaOS Development Team.
+    Be Placed in a location that is reasonably visible (e.g. documentation, splash screen, about page, 
+    website footer, promotional materials, or product description).
+    Not be hidden, minimized, or intentionally obscured.
+
+    Example (acceptable but not explicitly required):
+
+    "This system is based on ChaOS, developed by the ChaOS Development Team"
+
+2. No misrepresentation of Origin
+
+    The software, operating system, kernel, components, tools, documentation, and any other associated
+    materials (collectivly, the "Software") must not be misrepresented as being authored, developed,
+    endorsed or maintained by any other individual or orginization other than the ChaOS development Team,
+    except where explicit authorized in writing by the ChaOS Development Team.
+
+    You may not claim, imply, or suggest that:
+
+    You are the origional creator or primary author of ChaOS
+    The ChaOS Development Team endorses you project, product, orginization, or service
+    Your modifications represent the official ChaOS release
+    ChaOS was developed by a different group, company, or individual
+
+3. Limitaions of use
+
+    Modifying and altering code or software is granted but distribution of said product must follow the
+    attribution requirements.
+
+Disclaimer of Liability (The ChaOS Clause)
+
+THIS SOFTARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. OS devleopment is inherently volatile. 
+In no event shall the ChaOS Development Team be held liable for hardware fialure, data loss, 
+"blue screens", or any other digital catastrophe resulting form the use of this software. Boot at your own risk.

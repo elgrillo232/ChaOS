@@ -1,0 +1,20 @@
+# Build artifacts
+build/
+*.o
+*.obj
+*.bin
+*.img
+*.elf
+*.pe
+
+# Local build/run scripts (kept out of repo by request)
+build.ps1
+build.bat
+run.ps1
+run.bat
+Makefile
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
