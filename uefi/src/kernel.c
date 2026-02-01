@@ -6,6 +6,7 @@
 #include "idt.h"
 #include "paging.h"
 #include "heap.h"
+#include "panic.h"
 
 
 static void halt_forever(void) {
@@ -58,7 +59,7 @@ void kernel_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table) {
         serial_writeln("[ChaOS] ExitBootServices: FAILED");
         // If ExitBootServices failed, the UEFI console should still be usable.
         console_writeln_ascii("ExitBootServices FAILED (see serial output)");
-        halt_forever();
+        PANIC("ExitBootServices failed");
     }
 
     serial_writeln("[ChaOS] Boot services are gone; kernel is now in control.");
@@ -71,10 +72,12 @@ void kernel_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table) {
     serial_write_hex64((uint64_t)pmm_free_page_count());
     serial_writeln("");
 
+    ASSERT(pmm_free_page_count() != 0);
+
     EFI_STATUS pst = paging_init_and_switch(&boot_info);
     if (pst != EFI_SUCCESS) {
         serial_writeln("[ChaOS] paging: FAILED");
-        halt_forever();
+        PANIC("paging_init_and_switch failed");
     }
 
     pmm_add_uefi_bootservices(&boot_info);
@@ -82,11 +85,15 @@ void kernel_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table) {
     serial_write_hex64((uint64_t)pmm_free_page_count());
     serial_writeln("");
 
+    ASSERT(pmm_free_page_count() != 0);
+
     heap_init();
     serial_writeln("[ChaOS] heap: initialized");
 
     void* h1 = kmalloc(64);
     void* h2 = kmalloc(4096);
+    ASSERT(h1 != 0);
+    ASSERT(h2 != 0);
     serial_write("[ChaOS] kmalloc 64 @ ");
     serial_write_hex64((uint64_t)(uintptr_t)h1);
     serial_writeln("");
