@@ -5,6 +5,7 @@
 #include "pmm.h"
 #include "idt.h"
 #include "paging.h"
+#include "heap.h"
 
 
 static void halt_forever(void) {
@@ -80,6 +81,21 @@ void kernel_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table) {
     serial_write("[ChaOS] PMM free pages (after BootServices free): ");
     serial_write_hex64((uint64_t)pmm_free_page_count());
     serial_writeln("");
+
+    heap_init();
+    serial_writeln("[ChaOS] heap: initialized");
+
+    void* h1 = kmalloc(64);
+    void* h2 = kmalloc(4096);
+    serial_write("[ChaOS] kmalloc 64 @ ");
+    serial_write_hex64((uint64_t)(uintptr_t)h1);
+    serial_writeln("");
+    serial_write("[ChaOS] kmalloc 4096 @ ");
+    serial_write_hex64((uint64_t)(uintptr_t)h2);
+    serial_writeln("");
+    kfree(h1);
+    kfree(h2);
+    serial_writeln("[ChaOS] kfree: OK");
 
     EFI_PHYSICAL_ADDRESS a = pmm_alloc_pages(1);
     EFI_PHYSICAL_ADDRESS b = pmm_alloc_pages(8);
