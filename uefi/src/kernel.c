@@ -4,6 +4,7 @@
 #include "serial.h"
 #include "pmm.h"
 #include "idt.h"
+#include "paging.h"
 
 
 static void halt_forever(void) {
@@ -66,6 +67,17 @@ void kernel_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table) {
 
     pmm_init(&boot_info);
     serial_write("[ChaOS] PMM free pages: ");
+    serial_write_hex64((uint64_t)pmm_free_page_count());
+    serial_writeln("");
+
+    EFI_STATUS pst = paging_init_and_switch(&boot_info);
+    if (pst != EFI_SUCCESS) {
+        serial_writeln("[ChaOS] paging: FAILED");
+        halt_forever();
+    }
+
+    pmm_add_uefi_bootservices(&boot_info);
+    serial_write("[ChaOS] PMM free pages (after BootServices free): ");
     serial_write_hex64((uint64_t)pmm_free_page_count());
     serial_writeln("");
 

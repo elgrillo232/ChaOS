@@ -13,6 +13,10 @@
 
 void pmm_init(const BOOT_INFO* boot_info);
 
+// Call after installing your own page tables (switching CR3).
+// This safely adds UEFI BootServices memory regions to the free pool.
+void pmm_add_uefi_bootservices(const BOOT_INFO* boot_info);
+
 EFI_PHYSICAL_ADDRESS pmm_alloc_pages(UINTN pages);
 void pmm_free_pages(EFI_PHYSICAL_ADDRESS addr, UINTN pages);
 

@@ -34,6 +34,7 @@ Compile 'uefi\src\serial.c' (Join-Path $BuildUefi 'serial.o')
 Compile 'uefi\src\pmm.c' (Join-Path $BuildUefi 'pmm.o')
 Compile 'uefi\src\idt.c' (Join-Path $BuildUefi 'idt.o')
 Compile 'uefi\src\isr.S' (Join-Path $BuildUefi 'isr.o')
+Compile 'uefi\src\paging.c' (Join-Path $BuildUefi 'paging.o')
 
 Write-Host "`n> ld (BOOTX64.EFI)"
 & ld -m i386pep -nostdlib -shared -Bsymbolic --subsystem 10 --entry efi_main --image-base 0 `
@@ -45,7 +46,8 @@ Write-Host "`n> ld (BOOTX64.EFI)"
   (Join-Path $BuildUefi 'serial.o') `
   (Join-Path $BuildUefi 'pmm.o') `
   (Join-Path $BuildUefi 'idt.o') `
-  (Join-Path $BuildUefi 'isr.o')
+  (Join-Path $BuildUefi 'isr.o') `
+  (Join-Path $BuildUefi 'paging.o')
 if ($LASTEXITCODE -ne 0) { throw "ld failed" }
 
 $BootPath = Join-Path $DiskRoot 'EFI\BOOT'
