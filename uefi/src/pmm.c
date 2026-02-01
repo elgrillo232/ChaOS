@@ -1,5 +1,7 @@
 #include "pmm.h"
 
+#include "kstring.h"
+
 #include <stdint.h>
 
 #define BITMAP_BYTES (PMM_TRACKED_PAGES / 8ULL)
@@ -7,12 +9,6 @@
 // 1 = used/reserved, 0 = free
 static uint8_t g_bitmap[BITMAP_BYTES];
 static UINTN g_free_pages = 0;
-
-static void mem_set(uint8_t* dst, uint8_t value, UINTN n) {
-    for (UINTN i = 0; i < n; i++) {
-        dst[i] = value;
-    }
-}
 
 static inline UINTN page_index(EFI_PHYSICAL_ADDRESS addr) {
     return (UINTN)(addr / PMM_PAGE_SIZE);
@@ -88,7 +84,7 @@ static void mark_range_used(UINTN start_page, UINTN page_count) {
 
 void pmm_init(const BOOT_INFO* boot_info) {
     // Start with everything reserved.
-    mem_set(g_bitmap, 0xFF, (UINTN)BITMAP_BYTES);
+    memset(g_bitmap, 0xFF, (size_t)BITMAP_BYTES);
     g_free_pages = 0;
 
     if (!boot_info || !boot_info->memory_map || boot_info->descriptor_size == 0) {

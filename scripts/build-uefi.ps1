@@ -13,6 +13,7 @@ New-Item -ItemType Directory -Force -Path $BuildUefi | Out-Null
 $CFlags = @(
   '-c','-O0',
   '-ffreestanding',
+  '-fno-builtin',
   '-fno-stack-protector',
   '-fno-pic',
   '-mno-red-zone',
@@ -37,6 +38,8 @@ Compile 'uefi\src\isr.S' (Join-Path $BuildUefi 'isr.o')
 Compile 'uefi\src\paging.c' (Join-Path $BuildUefi 'paging.o')
 Compile 'uefi\src\heap.c' (Join-Path $BuildUefi 'heap.o')
 Compile 'uefi\src\panic.c' (Join-Path $BuildUefi 'panic.o')
+Compile 'uefi\src\kstring.c' (Join-Path $BuildUefi 'kstring.o')
+Compile 'uefi\src\klog.c' (Join-Path $BuildUefi 'klog.o')
 
 Write-Host "`n> ld (BOOTX64.EFI)"
 & ld -m i386pep -nostdlib -shared -Bsymbolic --subsystem 10 --entry efi_main --image-base 0 `
@@ -51,7 +54,9 @@ Write-Host "`n> ld (BOOTX64.EFI)"
   (Join-Path $BuildUefi 'isr.o') `
   (Join-Path $BuildUefi 'paging.o') `
   (Join-Path $BuildUefi 'heap.o') `
-  (Join-Path $BuildUefi 'panic.o')
+  (Join-Path $BuildUefi 'panic.o') `
+  (Join-Path $BuildUefi 'kstring.o') `
+  (Join-Path $BuildUefi 'klog.o')
 if ($LASTEXITCODE -ne 0) { throw "ld failed" }
 
 $BootPath = Join-Path $DiskRoot 'EFI\BOOT'

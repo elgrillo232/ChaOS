@@ -7,6 +7,7 @@
 #include "paging.h"
 #include "heap.h"
 #include "panic.h"
+#include "klog.h"
 
 
 static void halt_forever(void) {
@@ -23,20 +24,20 @@ static inline uint64_t read_cr2(void) {
 }
 
 void isr_common_handler(isr_context_t* ctx) {
-    serial_writeln("\r\n[ChaOS] EXCEPTION");
-    serial_write("vector=");
-    serial_write_hex64(ctx ? ctx->vector : 0);
-    serial_write(" error=");
-    serial_write_hex64(ctx ? ctx->error : 0);
-    serial_writeln("");
-    serial_write("rip=");
-    serial_write_hex64(ctx ? ctx->rip : 0);
-    serial_write(" rflags=");
-    serial_write_hex64(ctx ? ctx->rflags : 0);
-    serial_writeln("");
-    serial_write("cr2=");
-    serial_write_hex64(read_cr2());
-    serial_writeln("");
+    klog_writeln("\r\n[ChaOS] EXCEPTION");
+    klog_write("vector=");
+    klog_hex64(ctx ? ctx->vector : 0);
+    klog_write(" error=");
+    klog_hex64(ctx ? ctx->error : 0);
+    klog_writeln("");
+    klog_write("rip=");
+    klog_hex64(ctx ? ctx->rip : 0);
+    klog_write(" rflags=");
+    klog_hex64(ctx ? ctx->rflags : 0);
+    klog_writeln("");
+    klog_write("cr2=");
+    klog_hex64(read_cr2());
+    klog_writeln("");
 
     halt_forever();
 }
@@ -54,64 +55,64 @@ void kernel_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table) {
     BOOT_INFO boot_info;
     EFI_STATUS st = uefi_exit_boot_services(image_handle, system_table, &boot_info);
     if (st == EFI_SUCCESS) {
-        serial_writeln("[ChaOS] ExitBootServices: OK");
+        klog_writeln("[ChaOS] ExitBootServices: OK");
     } else {
-        serial_writeln("[ChaOS] ExitBootServices: FAILED");
+        klog_writeln("[ChaOS] ExitBootServices: FAILED");
         // If ExitBootServices failed, the UEFI console should still be usable.
         console_writeln_ascii("ExitBootServices FAILED (see serial output)");
         PANIC("ExitBootServices failed");
     }
 
-    serial_writeln("[ChaOS] Boot services are gone; kernel is now in control.");
+    klog_writeln("[ChaOS] Boot services are gone; kernel is now in control.");
     // Do not call UEFI console services after ExitBootServices.
 
     idt_init();
 
     pmm_init(&boot_info);
-    serial_write("[ChaOS] PMM free pages: ");
-    serial_write_hex64((uint64_t)pmm_free_page_count());
-    serial_writeln("");
+    klog_write("[ChaOS] PMM free pages: ");
+    klog_hex64((uint64_t)pmm_free_page_count());
+    klog_writeln("");
 
     ASSERT(pmm_free_page_count() != 0);
 
     EFI_STATUS pst = paging_init_and_switch(&boot_info);
     if (pst != EFI_SUCCESS) {
-        serial_writeln("[ChaOS] paging: FAILED");
+        klog_writeln("[ChaOS] paging: FAILED");
         PANIC("paging_init_and_switch failed");
     }
 
     pmm_add_uefi_bootservices(&boot_info);
-    serial_write("[ChaOS] PMM free pages (after BootServices free): ");
-    serial_write_hex64((uint64_t)pmm_free_page_count());
-    serial_writeln("");
+    klog_write("[ChaOS] PMM free pages (after BootServices free): ");
+    klog_hex64((uint64_t)pmm_free_page_count());
+    klog_writeln("");
 
     ASSERT(pmm_free_page_count() != 0);
 
     heap_init();
-    serial_writeln("[ChaOS] heap: initialized");
+    klog_writeln("[ChaOS] heap: initialized");
 
     void* h1 = kmalloc(64);
     void* h2 = kmalloc(4096);
     ASSERT(h1 != 0);
     ASSERT(h2 != 0);
-    serial_write("[ChaOS] kmalloc 64 @ ");
-    serial_write_hex64((uint64_t)(uintptr_t)h1);
-    serial_writeln("");
-    serial_write("[ChaOS] kmalloc 4096 @ ");
-    serial_write_hex64((uint64_t)(uintptr_t)h2);
-    serial_writeln("");
+    klog_write("[ChaOS] kmalloc 64 @ ");
+    klog_hex64((uint64_t)(uintptr_t)h1);
+    klog_writeln("");
+    klog_write("[ChaOS] kmalloc 4096 @ ");
+    klog_hex64((uint64_t)(uintptr_t)h2);
+    klog_writeln("");
     kfree(h1);
     kfree(h2);
-    serial_writeln("[ChaOS] kfree: OK");
+    klog_writeln("[ChaOS] kfree: OK");
 
     EFI_PHYSICAL_ADDRESS a = pmm_alloc_pages(1);
     EFI_PHYSICAL_ADDRESS b = pmm_alloc_pages(8);
-    serial_write("[ChaOS] alloc 1 page @ ");
-    serial_write_hex64((uint64_t)a);
-    serial_writeln("");
-    serial_write("[ChaOS] alloc 8 pages @ ");
-    serial_write_hex64((uint64_t)b);
-    serial_writeln("");
+    klog_write("[ChaOS] alloc 1 page @ ");
+    klog_hex64((uint64_t)a);
+    klog_writeln("");
+    klog_write("[ChaOS] alloc 8 pages @ ");
+    klog_hex64((uint64_t)b);
+    klog_writeln("");
 
     halt_forever();
 }

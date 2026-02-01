@@ -1,7 +1,8 @@
 #include "paging.h"
 
 #include "pmm.h"
-#include "serial.h"
+#include "klog.h"
+#include "kstring.h"
 
 // x86_64 paging flags
 #define PTE_P   (1ULL << 0)
@@ -12,20 +13,13 @@ static inline void write_cr3(uint64_t value) {
     __asm__ __volatile__("mov %0, %%cr3" : : "r"(value) : "memory");
 }
 
-static void mem_zero(void* p, UINTN n) {
-    uint8_t* b = (uint8_t*)p;
-    for (UINTN i = 0; i < n; i++) {
-        b[i] = 0;
-    }
-}
-
 static uint64_t* alloc_pt_page(void) {
     EFI_PHYSICAL_ADDRESS phys = pmm_alloc_pages(1);
     if (!phys) {
         return 0;
     }
     uint64_t* v = (uint64_t*)(uintptr_t)phys;
-    mem_zero(v, 4096);
+    memset(v, 0, 4096);
     return v;
 }
 
@@ -36,7 +30,7 @@ EFI_STATUS paging_init_and_switch(const BOOT_INFO* boot_info) {
     // This kernel currently only supports running below 4GiB.
     uint64_t here = (uint64_t)(uintptr_t)&paging_init_and_switch;
     if (here >= 0x100000000ULL) {
-        serial_writeln("[ChaOS] paging: kernel above 4GiB not supported yet");
+        klog_writeln("[ChaOS] paging: kernel above 4GiB not supported yet");
         return EFI_UNSUPPORTED;
     }
 
@@ -73,6 +67,6 @@ EFI_STATUS paging_init_and_switch(const BOOT_INFO* boot_info) {
     write_cr3((uint64_t)(uintptr_t)pml4);
     __asm__ __volatile__("sti" : : : "memory");
 
-    serial_writeln("[ChaOS] paging: switched to kernel page tables (identity 0-4GiB)");
+    klog_writeln("[ChaOS] paging: switched to kernel page tables (identity 0-4GiB)");
     return EFI_SUCCESS;
 }
