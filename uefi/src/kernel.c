@@ -3,8 +3,8 @@
 #include "bootinfo.h"
 #include "serial.h"
 #include "pmm.h"
+#include "idt.h"
 
-#include <stdint.h>
 
 static void halt_forever(void) {
     __asm__ __volatile__("cli");
@@ -13,15 +13,29 @@ static void halt_forever(void) {
     }
 }
 
-static void serial_write_hex64(uint64_t v) {
-    static const char* kHex = "0123456789ABCDEF";
-    char buf[2];
-    buf[1] = '\0';
-    serial_write("0x");
-    for (int i = 60; i >= 0; i -= 4) {
-        buf[0] = kHex[(v >> i) & 0xFULL];
-        serial_write(buf);
-    }
+static inline uint64_t read_cr2(void) {
+    uint64_t v;
+    __asm__ __volatile__("mov %%cr2, %0" : "=r"(v));
+    return v;
+}
+
+void isr_common_handler(isr_context_t* ctx) {
+    serial_writeln("\r\n[ChaOS] EXCEPTION");
+    serial_write("vector=");
+    serial_write_hex64(ctx ? ctx->vector : 0);
+    serial_write(" error=");
+    serial_write_hex64(ctx ? ctx->error : 0);
+    serial_writeln("");
+    serial_write("rip=");
+    serial_write_hex64(ctx ? ctx->rip : 0);
+    serial_write(" rflags=");
+    serial_write_hex64(ctx ? ctx->rflags : 0);
+    serial_writeln("");
+    serial_write("cr2=");
+    serial_write_hex64(read_cr2());
+    serial_writeln("");
+
+    halt_forever();
 }
 
 void kernel_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table) {
@@ -47,6 +61,8 @@ void kernel_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table) {
 
     serial_writeln("[ChaOS] Boot services are gone; kernel is now in control.");
     // Do not call UEFI console services after ExitBootServices.
+
+    idt_init();
 
     pmm_init(&boot_info);
     serial_write("[ChaOS] PMM free pages: ");

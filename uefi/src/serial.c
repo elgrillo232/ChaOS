@@ -48,3 +48,14 @@ void serial_writeln(const char* s) {
     serial_write(s);
     serial_write("\r\n");
 }
+
+void serial_write_hex64(uint64_t v) {
+    static const char* kHex = "0123456789ABCDEF";
+    char buf[2];
+    buf[1] = '\0';
+    serial_write("0x");
+    for (int i = 60; i >= 0; i -= 4) {
+        buf[0] = kHex[(v >> i) & 0xFULL];
+        serial_write(buf);
+    }
+}
