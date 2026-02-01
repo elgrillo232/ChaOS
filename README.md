@@ -32,6 +32,32 @@ If you have local scripts:
 
 (These scripts are intentionally not committed; adjust to your local toolchain paths.)
 
+## UEFI (x86_64) boot (experimental)
+
+This repo also includes a minimal UEFI application at `uefi/bootx64.c`.
+
+It builds a `BOOTX64.EFI` that should run on most x86_64 UEFI machines (typically with Secure Boot disabled), and in QEMU using EDK2/OVMF.
+
+### Build `BOOTX64.EFI`
+
+From the repo root:
+
+- Compile: `gcc -c -O0 -ffreestanding -fno-stack-protector -fno-pic -mno-red-zone -fshort-wchar -I uefi -o build/uefi/bootx64.o uefi/bootx64.c`
+- Link: `ld -m i386pep -nostdlib -shared -Bsymbolic --subsystem 10 --entry efi_main --image-base 0 -o build/uefi/BOOTX64.EFI build/uefi/bootx64.o`
+
+### Run in QEMU (UEFI)
+
+Create a folder that will be exposed as a FAT drive:
+
+- `mkdir build/uefi_disk/EFI/BOOT`
+- Copy `build/uefi/BOOTX64.EFI` to `build/uefi_disk/EFI/BOOT/BOOTX64.EFI`
+
+Then run QEMU with the x86_64 EDK2 firmware (path may vary by install):
+
+- `"C:\Program Files\qemu\qemu-system-x86_64.exe" -machine q35 -m 256M -drive if=pflash,format=raw,readonly=on,file="C:\Program Files\qemu\share\edk2-x86_64-code.fd" -drive file=fat:rw:build/uefi_disk,format=raw -serial stdio`
+
+You should see: `ChaOS UEFI boot OK`.
+
 ## Notes
 
 - VGA text mode is memory-mapped at `0xB8000` and uses 2 bytes per cell (character + attribute).
