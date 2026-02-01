@@ -6,13 +6,12 @@ build/
 *.img
 *.elf
 *.pe
+*.efi
+*.EFI
 
 # Local build/run scripts (kept out of repo by request)
-build.ps1
-build.bat
-run.ps1
-run.bat
-Makefile
+# Archived local BIOS scripts
+archive/bios/local-scripts/
 
 # OS/editor noise
 .DS_Store
